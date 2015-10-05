@@ -15,9 +15,21 @@ public class Client extends Thread {
 	}
 
 	public void run() {
-		/* TODO: Register a claim for up to nUnits of resource with the banker. Then create a loop that will be executed nRequests times; each iteration will either request or release resources by invoking methods in the banker.
-If the banker.remaining() == 0, then the client will release all of its units, otherwise the client will request some units.
-At the end of each loop, use Thread.sleep(millis) to sleep a random number of milliseconds from minSleepMillis to maxSleepMillis. This will introduce another dose of non-determinism into your program.
-When the loop is done, release any units still allocated and simply return 	from run( ) - this will terminate the client thread. */
+		// TODO: Register a claim for up to nUnits of resource with the banker. 
+		
+		for (int i = 0; i < this.nRequests; ++i) {
+			// TODO: request or release resources by invoking methods in banker
+		}
+
+		if (this.banker.remaining() == 0) {
+			// TODO: release all units
+		} else {
+			// TODO: request units
+		}
+		
+		//TODO: At the end of each loop, use Thread.sleep(millis) to sleep a random number of milliseconds from minSleepMillis to maxSleepMillis. This will introduce another dose of non-determinism into your program.
+		
+		// TODO: after loop, release any units still allocated and return
+		return;
 	}
 }
