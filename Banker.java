@@ -36,7 +36,15 @@ public class Banker {
     while (true) {
       if (totalUnits > units && isStateSafe(currentThread, units)) {
             allocate(currentThread, units);
+            return true;
       }
+      System.out.println("Thread " + currentThread + " waits");
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				System.err.println("Error");
+			}
+			System.out.println("Thread " + currentThread + " awakened");
     }
   }
 
