@@ -12,6 +12,7 @@ public class Banker {
 
   public Banker(int numberOfUnits) {
     this.numberOfUnits = numberOfUnits;
+    this.totalUnits = numberOfUnits;
     registeredClaimNames = new ArrayList<String>();
     registeredClaims = new ArrayList<int[]>();
   }
@@ -19,6 +20,7 @@ public class Banker {
   public synchronized void setClaim(int units) {
     String currentThread = Thread.currentThread().getName();
     if (threadHasClaim(currentThread) || notEnoughUnits(units)) {
+
       System.exit(1);
     }
     registerClaim(currentThread, units);
