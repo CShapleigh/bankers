@@ -15,7 +15,7 @@ public class Client extends Thread {
 	}
 
 	public void run() {
-		// TODO: Register a claim for up to nUnits of resource with the banker.
+		this.banker.setClaim(nUnits);  // register claim for up to nUnits
 
 		for (int i = 0; i < this.nRequests; ++i) {
 			// TODO: request or release resources by invoking methods in banker
