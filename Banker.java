@@ -11,7 +11,7 @@ public class Banker {
   private ArrayList<int[]> registeredClaims;
 
   public Banker(int numberOfUnits) {
-    numberOfUnits = numberOfUnits;
+    this.numberOfUnits = numberOfUnits;
     registeredClaimNames = new ArrayList<String>();
     registeredClaims = new ArrayList<int[]>();
   }
