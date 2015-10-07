@@ -1,12 +1,12 @@
 public class Client extends Thread {
-	Banker banker;
-	int nUnits;
-	int nRequests;
-	long minSleepMillis;
-	long maxSleepMillis;
+	private Banker banker;
+	private int nUnits;
+	private int nRequests;
+	private long minSleepMillis;
+	private long maxSleepMillis;
 
 	public Client(String name, Banker banker, int nUnits, int nRequests, long minSleepMillis, long maxSleepMillis) {
-			// TODO: pass name to super
+			super(name);
 			this.banker = banker;
 			this.nUnits = nUnits;
 			this.nRequests = nRequests;
@@ -15,21 +15,24 @@ public class Client extends Thread {
 	}
 
 	public void run() {
-		// TODO: Register a claim for up to nUnits of resource with the banker. 
-		
+		this.banker.setClaim(nUnits);  // register claim for up to nUnits
+
 		for (int i = 0; i < this.nRequests; ++i) {
-			// TODO: request or release resources by invoking methods in banker
+			if (this.banker.remaining() == 0) {
+				this.banker.release(this.banker.remaining());  // release all units
+			} else {
+				this.banker.request(nUnits);  // request some units
+			}
+
+			// Sleep for random amount
+			try {
+				Thread.sleep((int)(Math.random() * maxSleepMillis + minSleepMillis));
+			} catch (InterruptedException e) {
+				System.out.println(e);
+			}
 		}
 
-		if (this.banker.remaining() == 0) {
-			// TODO: release all units
-		} else {
-			// TODO: request units
-		}
-		
-		//TODO: At the end of each loop, use Thread.sleep(millis) to sleep a random number of milliseconds from minSleepMillis to maxSleepMillis. This will introduce another dose of non-determinism into your program.
-		
-		// TODO: after loop, release any units still allocated and return
+		this.banker.release(this.banker.remaining()); // release any units still allocated
 		return;
 	}
 }
