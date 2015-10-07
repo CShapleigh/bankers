@@ -6,7 +6,7 @@ public class Client extends Thread {
 	long maxSleepMillis;
 
 	public Client(String name, Banker banker, int nUnits, int nRequests, long minSleepMillis, long maxSleepMillis) {
-			// TODO: pass name to super
+			super(name);
 			this.banker = banker;
 			this.nUnits = nUnits;
 			this.nRequests = nRequests;
@@ -15,8 +15,8 @@ public class Client extends Thread {
 	}
 
 	public void run() {
-		// TODO: Register a claim for up to nUnits of resource with the banker. 
-		
+		// TODO: Register a claim for up to nUnits of resource with the banker.
+
 		for (int i = 0; i < this.nRequests; ++i) {
 			// TODO: request or release resources by invoking methods in banker
 		}
