@@ -1,29 +1,38 @@
 import java.util.ArrayList;
 
 public class Banker {
-
-  private int numberOfUnits;
+  private int numberOfUnitsOnHand;  // total number of units Bank has to loan
   private int totalUnits;
 
-  //These should really be an object but NOOO apparently I have to submit 3 files
-  //...whatever, this is super shitty.
   private ArrayList<String> registeredClaimNames;
   private ArrayList<int[]> registeredClaims;
 
-  public Banker(int numberOfUnits) {
-    this.numberOfUnits = numberOfUnits;
-    this.totalUnits = numberOfUnits;
+  public Banker(int nUnits) {
+    this.numberOfUnitsOnHand = nUnits;
+    this.totalUnits = nUnits;
     registeredClaimNames = new ArrayList<String>();
     registeredClaims = new ArrayList<int[]>();
+    System.out.println("Banker created with " + this.totalUnits + " total units.");
   }
 
-  public synchronized void setClaim(int units) {
-    String currentThread = Thread.currentThread().getName();
-    if (threadHasClaim(currentThread) || notEnoughUnits(units)) {
+  // Attempts to register claim for up to nUnits of resource
+  public synchronized void setClaim(int nUnits) {
 
-      System.exit(1);
+
+    String currentThread = Thread.currentThread().getName();
+
+    if (threadHasClaim(currentThread)) {
+      System.out.println(currentThread + " already has registered claim!");
+    } else if (nUnits <= 0) {
+      System.out.println(currentThread + " isn't requesting a positive amount...");
+    } else if (notEnoughUnits(nUnits)) {
+      System.out.println(nUnits + " is greater than the total Banks's " + this.numberOfUnitsOnHand);
+    } else {
+      registerClaim(currentThread, nUnits);
+      return;
     }
-    registerClaim(currentThread, units);
+
+    System.exit(1);
   }
 
   //needs refactor, very ugly!!!
@@ -32,32 +41,34 @@ public class Banker {
     boolean requestExceedsClaim = units > remaining();
     int threadNumber = registeredClaimNames.indexOf(currentThread);
     if (noClaimOrNotEnoughUnits(currentThread, units) || requestExceedsClaim) {
+
       System.exit(1);
     }
-    System.out.println("Thread " + currentThread + " requests " + units + ".");
+    System.out.println(currentThread + " requests " + units + ".");
     while (true) {
-      if (totalUnits > units && isStateSafe(currentThread, units)) {
+      if (this.numberOfUnitsOnHand > units && isStateSafe(currentThread, units)) {
             allocate(currentThread, units);
             return true;
       }
-      System.out.println("Thread " + currentThread + " waits");
+      System.out.println(currentThread + " waits");
 			try {
 				wait();
 			} catch (InterruptedException e) {
 				System.err.println("Error");
 			}
-			System.out.println("Thread " + currentThread + " awakened");
+			System.out.println(currentThread + " awakened");
     }
   }
 
   public synchronized void release(int units) {
+    // Client is returning its loan (resources) to the bank.
     String currentThread = Thread.currentThread().getName();
     if (noClaimOrNotEnoughUnits(currentThread, units)) {
       System.exit(1);
     }
     int threadNumber = registeredClaimNames.indexOf(currentThread);
     registeredClaims.get(threadNumber)[0] -= units;
-    totalUnits += units;
+    this.numberOfUnitsOnHand += units;
     System.out.println("Thread " + currentThread + " releases " + units + ".");
     notifyAll();
   }
@@ -81,7 +92,7 @@ public class Banker {
     if (desiredUnits == units) {
       return true;
     }
-    int resourcesLeft = totalUnits - units;
+    int resourcesLeft = this.numberOfUnitsOnHand - units;
     for (int[] claim : registeredClaims) {
       if (claim[1] - claim[0] == 0) {
         resourcesLeft += claim[1];
@@ -101,26 +112,38 @@ public class Banker {
   }
 
   private void allocate(String currentThread, int units) {
+
+    // Get the thread and assign it the requested units.
+    // Also decrement numberOfUnitsOnHand
     int threadNumber = registeredClaimNames.indexOf(currentThread);
-    totalUnits -= units;
+    this.numberOfUnitsOnHand -= units;
     registeredClaims.get(threadNumber)[0] += units;
-    System.out.println("Thread " + currentThread + " has " + units + " allocated.");
+
+    System.out.println("Ding! Bank allocates " + units + " units to Client " + threadNumber);
+    System.out.println("Bank has " + this.numberOfUnitsOnHand + " units on hand.");
   }
 
   private boolean noClaimOrNotEnoughUnits(String currentThread, int units) {
     int threadNumber = registeredClaimNames.indexOf(currentThread);
-    boolean noClaimRegistered = threadNumber == -1;
-    boolean notEnoughUnits = units < 1;
-    return noClaimRegistered || notEnoughUnits;
+    int threadSetClaim = registeredClaims.get(threadNumber)[1];
+    boolean isClaimRegistered = (threadNumber != -1);
+    if (!isClaimRegistered) {
+      System.out.println(currentThread + " didn't register a claim");
+    } else if (units < 1) {
+      System.out.println(currentThread + "'s request of " + units + " units isn't enough.");
+    } else if (units > threadSetClaim) {
+      System.out.println(currentThread + " is requesting more than total claim of " + threadSetClaim);
+    } else {
+      return false;
+    }
+    return true;
   }
 
   private void registerClaim(String currentThread, int units) {
       registeredClaimNames.add(currentThread);
-      int[] claim = new int[2];
-      claim[0] = 0;
-      claim[1] = units;
+      int claim[] = {0, units};
       registeredClaims.add(claim);
-      System.out.println("Thread " + currentThread + " sets a claim for " + units+ ".");
+      System.out.println(currentThread + " registered claim for " + units + ".");
   }
 
   private boolean threadHasClaim(String currentThread) {
@@ -133,10 +156,6 @@ public class Banker {
   }
 
   private boolean notEnoughUnits(int units) {
-    if (units > totalUnits) {
-      return true;
-    }
-    return false;
+    return (units > this.totalUnits);
   }
-
 }
