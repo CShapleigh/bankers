@@ -5,6 +5,8 @@ public class Client extends Thread {
 	private long minSleepMillis;
 	private long maxSleepMillis;
 
+	// Client has a max "claim" - the total amount that he can
+	// possibly take from the bank.
 	public Client(String name, Banker banker, int nUnits, int nRequests, long minSleepMillis, long maxSleepMillis) {
 			super(name);
 			this.banker = banker;
@@ -19,20 +21,21 @@ public class Client extends Thread {
 
 		for (int i = 0; i < this.nRequests; ++i) {
 			if (this.banker.remaining() == 0) {
-				this.banker.release(this.banker.remaining());  // release all units
+				this.banker.release(this.nUnits);  // release all units
 			} else {
-				this.banker.request(nUnits);  // request some units
+				this.banker.request((int)(Math.random() * this.nUnits + 1));  // request some units
 			}
 
 			// Sleep for random amount
 			try {
 				Thread.sleep((int)(Math.random() * maxSleepMillis + minSleepMillis));
+				System.out.println(Thread.currentThread().getName() + " waits...");
 			} catch (InterruptedException e) {
 				System.out.println(e);
 			}
 		}
 
-		this.banker.release(this.banker.remaining()); // release any units still allocated
+		this.banker.release(this.nUnits); // release any units still allocated
 		return;
 	}
 }
